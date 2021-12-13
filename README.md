@@ -102,8 +102,10 @@ sales_amount=10.00
 
 - Updated every second with expire statistic task scheduler
 
-- Preferred to be able to get statistics with O(1) complexity
+- Preferred to be able to get statistics with O(1) time complexity
 
 > **`ExpireStatisticsTask`**
 
 - Used to update `subStatisticDtos` queue and `finalSubStatisticDto` every second with an expire statistics thread. 
+
+- Preferred to be able to get statistics with O(1) time complexity
