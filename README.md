@@ -1,4 +1,4 @@
-# Sales stats
+# Sales Statistics
 
 This application is implemented as a single standalone microservice that calculates real-time statistics of item sales on the eCG marketplace platform.
 
@@ -9,7 +9,7 @@ This application is implemented as a single standalone microservice that calcula
 
 - Docker engine
 
-### Build application image 
+### Build an application image 
 `docker build -t stats-app:1.0 .`
 
 ### Run and publish application image
@@ -52,7 +52,7 @@ sales_amount=10.00
 ```
 ### `SubStatistic`
 
-- Used to group statistics according to sale seconds values
+- Used to group statistics according to second values of sale request time
 ```
 {
     Double totalAmount;
@@ -70,15 +70,16 @@ sales_amount=10.00
 
 - *SiteOps team allocated limited cloud resources*
 
-### Solutions: 
+## Memory Solutions 
 
+---
 > **`ConcurrentLinkedQueue<SubStatisticDto> subStatisticDtos`**
 
 - Used to keep grouped statistics with a queue in statistic service
 
 - Size can be in the range of (0-60)
 
-- Updated every second with expire statistic task schedular
+- Updated every second with expire statistic task scheduler
 
 - Preferred due to thread safe requirement
 
@@ -86,23 +87,23 @@ sales_amount=10.00
 ---
 - *250.000 items are sold each minute*
 
-- *use your CPU wisely while calculating the statistics*
+- *use your CPU wisely while calculating the statistics with low time complexity*
 
-### Solutions:
+## Performance Solutions
+---
 
 > **`@Async POST /sales`**
 
-- Saving sale method implemented async to not block POST sale operation with statistic calculations, updates or transactions.
+- Saving sale method implemented asynchronously to not block POST sale operation with statistic calculations, updates or transactions.
 
 > **`SubStatisticDto finalSubStatisticDto`**
 
-- Used to keep sum of grouped statistics kept on queue
+- In statistic service, it is used to keep sum of grouped statistics kept on queue
 
-- Updated every second with expire statistic task schedular
+- Updated every second with expire statistic task scheduler
 
 - Preferred to be able to get statistics with O(1) complexity
 
 > **`ExpireStatisticsTask`**
 
-- Used to update `subStatisticDtos` queue and `finalSubStatisticDto` every second. 
-
+- Used to update `subStatisticDtos` queue and `finalSubStatisticDto` every second with an expire statistics thread. 
