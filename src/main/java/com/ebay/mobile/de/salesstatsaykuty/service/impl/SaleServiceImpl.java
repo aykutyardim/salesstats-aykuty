@@ -17,6 +17,6 @@ public class SaleServiceImpl implements SaleService {
     @Override
     @Async
     public void save(double salesAmount) {
-        statisticService.update(salesAmount, Calendar.getInstance());
+        statisticService.updateWhenSold(salesAmount, Calendar.getInstance());
     }
 }

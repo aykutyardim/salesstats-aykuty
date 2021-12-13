@@ -21,7 +21,7 @@ public class StatisticController {
 
     @GetMapping
     public Statistic get(){
-        return this.mapper.dtoToEntity(this.service.getAll());
+        return this.mapper.dtoToEntity(this.service.get());
     }
 
 }

@@ -17,35 +17,72 @@ public class StatisticServiceImpl implements StatisticService {
     private SubStatisticService subStatisticService;
 
     protected ConcurrentLinkedQueue<SubStatisticDto> subStatisticDtos;
+    protected SubStatisticDto finalSubStatisticDto;
 
     public StatisticServiceImpl() {
         this.subStatisticDtos = new ConcurrentLinkedQueue<SubStatisticDto>();
+        this.finalSubStatisticDto = new SubStatisticDto(Calendar.getInstance());
     }
 
     @Override
-    public StatisticDto getAll(){
-        SubStatisticDto subStatisticDto = subStatisticService.getLastMinute(this.subStatisticDtos, Calendar.getInstance());
-        Double average = subStatisticDto.getTotalAmount() / subStatisticDto.getOrderCount();
-        return new StatisticDto(subStatisticDto.getTotalAmount(), Double.isNaN(average) ? 0.0 : average);
+    public void expire(Calendar calendar){
+        this.subStatisticDtos.stream().forEach(subStatisticDto -> {
+            if (subStatisticDto.getTotalAmount() > 0.0 && subStatisticService.isExpired(subStatisticDto, calendar)){
+                this.updateWhenExpired(subStatisticDto);
+            }
+        });
     }
 
     @Override
-    public void update(double amount, Calendar calendar){
+    public StatisticDto get(){
+        double average = finalSubStatisticDto.getTotalAmount() / finalSubStatisticDto.getOrderCount();
+        return new StatisticDto(finalSubStatisticDto.getTotalAmount(), Double.isNaN(average) ? 0.0 : average);
+    }
 
-        // Get existing subStatistic by second index
+    @Override
+    public void updateWhenExpired(SubStatisticDto subStatisticDto){
+        // update final sub statistic
+        subStatisticService.update(
+                finalSubStatisticDto,
+                finalSubStatisticDto.getTotalAmount() - subStatisticDto.getTotalAmount(),
+                finalSubStatisticDto.getOrderCount() - subStatisticDto.getOrderCount(),
+                finalSubStatisticDto.getLastUpdate());
+        // update sub statistic in queue
+        subStatisticService.update(subStatisticDto, 0.0, 0, subStatisticDto.getLastUpdate());
+
+    }
+
+    @Override
+    public void updateWhenSold(double amount, Calendar calendar){
+
+        // Get existing sub statistic if matches with second
         SubStatisticDto subStatisticDto = this.subStatisticDtos.stream()
                 .filter(currentSubStatisticDto -> currentSubStatisticDto.getLastUpdate().get(Calendar.SECOND) == calendar.get(Calendar.SECOND))
                 .findFirst()
                 .orElse(null);
 
-        // Update existing subStatisticDto
-        if (subStatisticDto != null){
-            this.subStatisticService.update(subStatisticDto, amount, calendar);
+        // Create new sub statistic and add queue if no match with second
+        if (subStatisticDto == null){
+            subStatisticDto = subStatisticService.create(amount, calendar);
+            this.subStatisticDtos.add(subStatisticDto);
         }
-
-        // Create and add subStatisticDto
         else{
-            this.subStatisticDtos.add(new SubStatisticDto(amount, calendar));
+            // Check existing sub statistic
+            if (subStatisticService.isExpired(subStatisticDto, calendar)){
+                this.updateWhenExpired(subStatisticDto);
+            }
+            // Update sub statistic
+            subStatisticService.update(
+                    subStatisticDto,
+                    subStatisticDto.getTotalAmount() + amount,
+                    subStatisticDto.getOrderCount() + 1,
+                    calendar);
         }
+        // update final sub statistic
+        subStatisticService.update(
+                finalSubStatisticDto,
+                finalSubStatisticDto.getTotalAmount() + amount,
+                finalSubStatisticDto.getOrderCount() + 1,
+                calendar);
     }
 }

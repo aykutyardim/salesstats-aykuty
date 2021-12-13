@@ -15,7 +15,7 @@ public class SubStatisticDto {
     private Integer orderCount;
     private Calendar lastUpdate;
 
-    // Constructor for get statistic
+    // Constructor for statistic service init
     public SubStatisticDto(Calendar calendar) {
         this.totalAmount = 0.0;
         this.orderCount = 0;
