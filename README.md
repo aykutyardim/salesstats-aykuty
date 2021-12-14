@@ -13,7 +13,7 @@ This application is implemented as a single standalone microservice that calcula
 `docker build -t stats-app:1.0 .`
 
 ### Run and publish application image
-`docker run -it --rm -p 8080:8080 stats-app:1.0`
+`docker run -it --name stats-app --rm -p 8080:8080 stats-app:1.0`
 
 ## Rest API
 ---
@@ -109,3 +109,79 @@ sales_amount=10.00
 - Used to update `subStatisticDtos` queue and `finalSubStatisticDto` every second with an expire statistics thread. 
 
 - Preferred to be able to get statistics with O(1) time complexity
+
+## Testing
+---
+
+- To run unit tests, **build an application image** step can be applied.
+
+**Expected Log Info**
+
+```
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0
+```
+
+
+## Statistic Methods & Related Unit Tests
+
+---
+
+*Implemented statistic unit testing methods can be found under test folder.*
+
+
+> `exipire(Calendar calendar)`
+
+- `shouldNotUpdateFinalSubStatisticDtoWhenNotExpired()`
+
+- `shouldUpdateFinalSubStatisticDtoWhenExpired()`
+
+> `get()`
+
+- `shouldGet()`
+
+
+> `updateWhenExpired(SubStatisticDto subStatisticDto)`
+
+- `shouldNotUpdateFinalSubStatisticDtoWhenNotExpired()`
+
+- `shouldUpdateFinalSubStatisticDtoWhenExpired()`
+
+
+
+> `updateWhenSold(double amount, Calendar calendar)`
+
+
+- `shouldUpdateQueueWhenSoldIfNotMatch()`
+
+- `shouldUpdateFinalSubStatisticDtoWhenSoldIfNotMatch()`
+
+- `shouldExpireFinalSubStatisticDtoWhenSoldIfMatchAndExpire()`
+
+- `shouldNotExpireFinalSubStatisticDtoWhenSoldIfMatchAndNotExpire()`
+
+- `shouldUpdateFinalSubStatisticDtoWhenSoldIfMatchAndExpire()`
+
+- `shouldUpdateFinalSubStatisticDtoWhenSoldIfMatchAndNotExpire()`
+
+
+## Sub Statistic Methods & Unit Testing
+
+---
+
+*Implemented sub statistic unit testing methods can be found under test folder.*
+
+> `create(double amount, Calendar lastUpdate)`
+
+- `shouldCreate()`
+
+> `isExpired(SubStatisticDto subStatisticDto, Calendar calendar)`
+
+- `shouldExpire()`
+
+- `shouldNotExpire()`
+
+> `update(SubStatisticDto subStatisticDto, double amount, int orderCount, Calendar lastUpdate)`
+
+- `shouldUpdate()`

@@ -3,7 +3,7 @@ FROM maven:3.6.3 AS maven
 WORKDIR /usr/src/app
 COPY . /usr/src/app
 # Compile and package the application to an executable JAR
-RUN mvn clean install -DskipTests
+RUN mvn clean install
 
 # For Java 11,
 FROM openjdk:11-jdk

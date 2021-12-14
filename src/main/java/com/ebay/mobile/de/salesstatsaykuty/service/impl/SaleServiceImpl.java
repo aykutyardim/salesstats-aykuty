@@ -11,8 +11,12 @@ import java.util.Calendar;
 @Service
 public class SaleServiceImpl implements SaleService {
 
-    @Autowired
     private StatisticService statisticService;
+
+    @Autowired
+    public SaleServiceImpl(StatisticService statisticService) {
+        this.statisticService = statisticService;
+    }
 
     @Override
     @Async

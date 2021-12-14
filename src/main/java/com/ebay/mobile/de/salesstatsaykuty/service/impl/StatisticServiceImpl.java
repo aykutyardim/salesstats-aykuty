@@ -13,15 +13,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Service
 public class StatisticServiceImpl implements StatisticService {
 
-    @Autowired
     private SubStatisticService subStatisticService;
+    ConcurrentLinkedQueue<SubStatisticDto> subStatisticDtos;
+    SubStatisticDto finalSubStatisticDto;
 
-    protected ConcurrentLinkedQueue<SubStatisticDto> subStatisticDtos;
-    protected SubStatisticDto finalSubStatisticDto;
-
-    public StatisticServiceImpl() {
+    @Autowired
+    public StatisticServiceImpl(SubStatisticService subStatisticService) {
         this.subStatisticDtos = new ConcurrentLinkedQueue<SubStatisticDto>();
         this.finalSubStatisticDto = new SubStatisticDto(Calendar.getInstance());
+        this.subStatisticService = subStatisticService;
     }
 
     @Override
