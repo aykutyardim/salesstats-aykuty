@@ -11,12 +11,16 @@ import java.util.Calendar;
 @Service
 public class SaleServiceImpl implements SaleService {
 
-    @Autowired
     private StatisticService statisticService;
+
+    @Autowired
+    public SaleServiceImpl(StatisticService statisticService) {
+        this.statisticService = statisticService;
+    }
 
     @Override
     @Async
     public void save(double salesAmount) {
-        statisticService.update(salesAmount, Calendar.getInstance());
+        statisticService.updateWhenSold(salesAmount, Calendar.getInstance());
     }
 }

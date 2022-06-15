@@ -5,44 +5,24 @@ import com.ebay.mobile.de.salesstatsaykuty.service.dto.SubStatisticDto;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Service
 public class SubStatisticServiceImpl implements SubStatisticService {
 
-
     @Override
-    public SubStatisticDto getLastMinute(ConcurrentLinkedQueue<SubStatisticDto> subStatisticDtos, Calendar calendar) {
-
-        // Total subStatistic for last min
-        SubStatisticDto lastMinuteSubStatisticDto = new SubStatisticDto(calendar);
-
-        // Filter and Calculate last min
-        subStatisticDtos.stream().forEach(subStatisticDto -> {
-            if(calendar.getTimeInMillis() - subStatisticDto.getLastUpdate().getTimeInMillis() < 1000 * 60){
-                lastMinuteSubStatisticDto.setTotalAmount(lastMinuteSubStatisticDto.getTotalAmount() + subStatisticDto.getTotalAmount());
-                lastMinuteSubStatisticDto.setOrderCount(lastMinuteSubStatisticDto.getOrderCount() + subStatisticDto.getOrderCount());
-            }
-        });
-
-        // Return last min
-        return lastMinuteSubStatisticDto;
+    public SubStatisticDto create(double amount, Calendar lastUpdate){
+        return new SubStatisticDto(amount, lastUpdate);
     }
 
     @Override
-    public void update(SubStatisticDto subStatisticDto, double amount, Calendar calendar){
+    public boolean isExpired(SubStatisticDto subStatisticDto, Calendar calendar){
+        return calendar.getTimeInMillis() - subStatisticDto.getLastUpdate().getTimeInMillis() > 1000 * 59;
+    }
 
-        if (calendar.getTimeInMillis() - subStatisticDto.getLastUpdate().getTimeInMillis() < 1000){
-            // Increase existing total amount and order count
-            subStatisticDto.setTotalAmount(subStatisticDto.getTotalAmount() + amount);
-            subStatisticDto.setOrderCount(subStatisticDto.getOrderCount() + 1);
-        }
-        else{
-            // Expire amount and order count
-            subStatisticDto.setTotalAmount(amount);
-            subStatisticDto.setOrderCount(1);
-        }
-        // Update Last Update Time
-        subStatisticDto.setLastUpdate(calendar);
+    @Override
+    public void update(SubStatisticDto subStatisticDto, double amount, int orderCount, Calendar lastUpdate){
+        subStatisticDto.setTotalAmount(amount);
+        subStatisticDto.setOrderCount(orderCount);
+        subStatisticDto.setLastUpdate(lastUpdate);
     }
 }
